@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "three": "^0.162.0"
+  },
+    "scripts": {
+      "dev": "vite",
+      "build": "echo 'Build script placeholder'"
+    }
+}
