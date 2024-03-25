@@ -1,4 +1,4 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 import WindowManager from "./WindowManager.js";
 
 const t = THREE;
@@ -104,40 +104,40 @@ if (new URLSearchParams(window.location.search).get("clear")) {
   }
 
   function updateNumberOfCircles() {
-	let wins = windowManager.getWindows();
-  
-	// Remove all existing circles from the scene
-	circles.forEach((circle) => {
-	  world.remove(circle);
-	});
-  
-	circles = [];
-  
-	// Add new circles based on the current window setup
-	for (let i = 0; i < wins.length; i++) {
-	  let win = wins[i];
-  
-	  let c = new t.Color();
-	  c.setHSL(i * 0.1, 1.0, 0.5);
-  
-	  let radius = 50 + i * 25;
-	  let segments = 32;
-  
-	  let circleGeometry = new t.CircleGeometry(radius, segments);
-	  let circleMaterial = new t.MeshBasicMaterial({ color: c, wireframe: true });
-  
-	  let circle = new t.Mesh(circleGeometry, circleMaterial);
-  
-	  circle.position.x = win.shape.x + win.shape.w * 0.5;
-	  circle.position.y = win.shape.y + win.shape.h * 0.5;
-  
-	  world.add(circle);
-	  circles.push(circle);
-	}
+    let wins = windowManager.getWindows();
+
+    // Remove all existing circles from the scene
+    circles.forEach((circle) => {
+      world.remove(circle);
+    });
+
+    circles = [];
+
+    // Add new circles based on the current window setup
+    for (let i = 0; i < wins.length; i++) {
+      let win = wins[i];
+
+      let c = new t.Color();
+      c.setHSL(i * 0.1, 1.0, 0.5);
+
+      let radius = 50 + i * 25;
+      let segments = 32;
+
+      let circleGeometry = new t.CircleGeometry(radius, segments);
+      let circleMaterial = new t.MeshBasicMaterial({
+        color: c,
+        wireframe: true,
+      });
+
+      let circle = new t.Mesh(circleGeometry, circleMaterial);
+
+      circle.position.x = win.shape.x + win.shape.w * 0.5;
+      circle.position.y = win.shape.y + win.shape.h * 0.5;
+
+      world.add(circle);
+      circles.push(circle);
+    }
   }
-  
-
-
 
   function updateWindowShape(easing = true) {
     // storing the actual offset in a proxy that we update against in the render function
@@ -185,7 +185,7 @@ if (new URLSearchParams(window.location.search).get("clear")) {
 
     renderer.render(scene, camera);
     requestAnimationFrame(render);
-}
+  }
 
   // resize the renderer to fit the window size
   function resize() {

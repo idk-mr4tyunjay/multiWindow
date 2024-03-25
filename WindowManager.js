@@ -1,151 +1,135 @@
-class WindowManager 
-{
-	#windows;
-	#count;
-	#id;
-	#winData;
-	#winShapeChangeCallback;
-	#winChangeCallback;
-	
-	constructor ()
-	{
-		let that = this;
+class WindowManager {
+  #windows;
+  #count;
+  #id;
+  #winData;
+  #winShapeChangeCallback;
+  #winChangeCallback;
 
-		// event listener for when localStorage is changed from another window
-		addEventListener("storage", (event) => 
-		{
-			if (event.key == "windows")
-			{
-				let newWindows = JSON.parse(event.newValue);
-				let winChange = that.#didWindowsChange(that.#windows, newWindows);
+  constructor() {
+    let that = this;
 
-				that.#windows = newWindows;
+    // event listener for when localStorage is changed from another window
+    addEventListener("storage", (event) => {
+      if (event.key == "windows") {
+        let newWindows = JSON.parse(event.newValue);
+        let winChange = that.#didWindowsChange(that.#windows, newWindows);
 
-				if (winChange)
-				{
-					if (that.#winChangeCallback) that.#winChangeCallback();
-				}
-			}
-		});
+        that.#windows = newWindows;
 
-		// event listener for when current window is about to ble closed
-		window.addEventListener('beforeunload', function (e) 
-		{
-			let index = that.getWindowIndexFromId(that.#id);
+        if (winChange) {
+          if (that.#winChangeCallback) that.#winChangeCallback();
+        }
+      }
+    });
 
-			//remove this window from the list and update local storage
-			that.#windows.splice(index, 1);
-			that.updateWindowsLocalStorage();
-		});
-	}
+    // event listener for when current window is about to ble closed
+    window.addEventListener("beforeunload", function (e) {
+      let index = that.getWindowIndexFromId(that.#id);
 
-	// check if theres any changes to the window list
-	#didWindowsChange (pWins, nWins)
-	{
-		if (pWins.length != nWins.length)
-		{
-			return true;
-		}
-		else
-		{
-			let c = false;
+      //remove this window from the list and update local storage
+      that.#windows.splice(index, 1);
+      that.updateWindowsLocalStorage();
+    });
+  }
 
-			for (let i = 0; i < pWins.length; i++)
-			{
-				if (pWins[i].id != nWins[i].id) c = true;
-			}
+  // check if theres any changes to the window list
+  #didWindowsChange(pWins, nWins) {
+    if (pWins.length != nWins.length) {
+      return true;
+    } else {
+      let c = false;
 
-			return c;
-		}
-	}
+      for (let i = 0; i < pWins.length; i++) {
+        if (pWins[i].id != nWins[i].id) c = true;
+      }
 
-	// initiate current window (add metadata for custom data to store with each window instance)
-	init (metaData)
-	{
-		this.#windows = JSON.parse(localStorage.getItem("windows")) || [];
-		this.#count= localStorage.getItem("count") || 0;
-		this.#count++;
+      return c;
+    }
+  }
 
-		this.#id = this.#count;
-		let shape = this.getWinShape();
-		this.#winData = {id: this.#id, shape: shape, metaData: metaData};
-		this.#windows.push(this.#winData);
+  // initiate current window (add metadata for custom data to store with each window instance)
+  init(metaData) {
+    this.#windows = JSON.parse(localStorage.getItem("windows")) || [];
+    this.#count = localStorage.getItem("count") || 0;
+    this.#count++;
 
-		localStorage.setItem("count", this.#count);
-		this.updateWindowsLocalStorage();
-	}
+    this.#id = this.#count;
+    let shape = this.getWinShape();
+    this.#winData = { id: this.#id, shape: shape, metaData: metaData };
+    this.#windows.push(this.#winData);
 
-	getWinShape ()
-	{
-		let shape = {x: window.screenLeft, y: window.screenTop, w: window.innerWidth, h: window.innerHeight};
-		return shape;
-	}
+    localStorage.setItem("count", this.#count);
+    //call update local storage
+    this.updateWindowsLocalStorage();
+  }
 
-	getWindowIndexFromId (id)
-	{
-		let index = -1;
+  getWinShape() {
+    let shape = {
+      x: window.screenLeft,
+      y: window.screenTop,
+      w: window.innerWidth,
+      h: window.innerHeight,
+    };
+    return shape;
+  }
 
-		for (let i = 0; i < this.#windows.length; i++)
-		{
-			if (this.#windows[i].id == id) index = i;
-		}
+  getWindowIndexFromId(id) {
+    let index = -1;
 
-		return index;
-	}
+    for (let i = 0; i < this.#windows.length; i++) {
+      if (this.#windows[i].id == id) index = i;
+    }
 
-	updateWindowsLocalStorage ()
-	{
-		localStorage.setItem("windows", JSON.stringify(this.#windows));
-	}
+    return index;
+  }
 
-	update ()
-	{
-		//console.log(step);
-		let winShape = this.getWinShape();
+  updateWindowsLocalStorage() {
+    localStorage.setItem("windows", JSON.stringify(this.#windows));
+  }
 
-		//console.log(winShape.x, winShape.y);
+  update() {
+    //console.log(step);
+    let winShape = this.getWinShape();
 
-		if (winShape.x != this.#winData.shape.x ||
-			winShape.y != this.#winData.shape.y ||
-			winShape.w != this.#winData.shape.w ||
-			winShape.h != this.#winData.shape.h)
-		{
-			
-			this.#winData.shape = winShape;
+    //console.log(winShape.x, winShape.y);
 
-			let index = this.getWindowIndexFromId(this.#id);
-			this.#windows[index].shape = winShape;
+    if (
+      winShape.x != this.#winData.shape.x ||
+      winShape.y != this.#winData.shape.y ||
+      winShape.w != this.#winData.shape.w ||
+      winShape.h != this.#winData.shape.h
+    ) {
+      this.#winData.shape = winShape;
 
-			//console.log(windows);
-			if (this.#winShapeChangeCallback) this.#winShapeChangeCallback();
-			this.updateWindowsLocalStorage();
-		}
-	}
+      let index = this.getWindowIndexFromId(this.#id);
+      this.#windows[index].shape = winShape;
 
-	setWinShapeChangeCallback (callback)
-	{
-		this.#winShapeChangeCallback = callback;
-	}
+      //console.log(windows);
+      if (this.#winShapeChangeCallback) this.#winShapeChangeCallback();
+      this.updateWindowsLocalStorage();
+    }
+  }
 
-	setWinChangeCallback (callback)
-	{
-		this.#winChangeCallback = callback;
-	}
+  setWinShapeChangeCallback(callback) {
+    this.#winShapeChangeCallback = callback;
+  }
 
-	getWindows ()
-	{
-		return this.#windows;
-	}
+  setWinChangeCallback(callback) {
+    this.#winChangeCallback = callback;
+  }
 
-	getThisWindowData ()
-	{
-		return this.#winData;
-	}
+  getWindows() {
+    return this.#windows;
+  }
 
-	getThisWindowID ()
-	{
-		return this.#id;
-	}
+  getThisWindowData() {
+    return this.#winData;
+  }
+
+  getThisWindowID() {
+    return this.#id;
+  }
 }
 
 export default WindowManager;
